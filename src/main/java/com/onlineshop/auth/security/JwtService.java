@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import com.onlineshop.auth.model.User;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,14 @@ public class JwtService {
 
     public String generateRefreshToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails.getUsername(), jwtRefreshExpirationMs);
+    }
+
+    public String generateToken(User user) {
+        return generateToken(new HashMap<>(), user.getUsername(), jwtExpirationMs);
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(new HashMap<>(), user.getUsername(), jwtRefreshExpirationMs);
     }
 
     private String generateToken(Map<String, Object> extraClaims, String subject, long expirationMs) {
@@ -79,6 +88,23 @@ public class JwtService {
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    /**
+     * Checks if the given token is a refresh token by comparing its expiration duration.
+     * This is a heuristic based on the configured refresh token expiration time.
+     * For production, consider using a custom claim to distinguish refresh tokens.
+     */
+    public boolean isRefreshToken(String token) {
+        try {
+            Date issuedAt = extractAllClaims(token).getIssuedAt();
+            Date expiration = extractExpiration(token);
+            long duration = expiration.getTime() - issuedAt.getTime();
+            // 1 minute tolerance
+            return Math.abs(duration - jwtRefreshExpirationMs) < 60_000;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public SecretKey getJwtSecretKey() {
