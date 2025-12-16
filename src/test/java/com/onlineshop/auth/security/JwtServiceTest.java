@@ -64,7 +64,7 @@ class JwtServiceTest {
     void invalidToken() {
         UserDetails userDetails = User.withUsername("testuser").password("pass").authorities(Collections.emptyList()).build();
         String token = "invalid.token.value";
-        assertThrows(Exception.class, () -> jwtService.extractUsername(token));
-        assertFalse(jwtService.validateToken(token, userDetails));
+        assertThrows(io.jsonwebtoken.JwtException.class, () -> jwtService.extractUsername(token));
+        assertThrows(io.jsonwebtoken.JwtException.class, () -> jwtService.validateToken(token, userDetails));
     }
 }
