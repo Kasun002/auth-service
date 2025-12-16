@@ -52,6 +52,15 @@ class JwtServiceTest {
     }
 
     @Test
+    void extractClaimWithCustomClaim() {
+        UserDetails userDetails = User.withUsername("claimuser2").password("pass").authorities(Collections.emptyList()).build();
+        String token = jwtService.generateToken(userDetails);
+        Claims claims = jwtService.extractClaim(token, c -> c);
+        assertEquals("claimuser2", claims.getSubject());
+        assertNotNull(claims.getExpiration());
+    }
+
+    @Test
     void expiredToken() throws InterruptedException {
         JwtService shortLivedJwt = new JwtService(secret, 1, refreshExp);
         UserDetails userDetails = User.withUsername("expuser").password("pass").authorities(Collections.emptyList()).build();
@@ -61,10 +70,68 @@ class JwtServiceTest {
     }
 
     @Test
+    void extractExpirationCoversException() {
+        String token = "invalid.token.value";
+        // isTokenExpired should return true if exception is thrown
+        assertTrue(jwtService.isTokenExpired(token));
+    }
+
+    @Test
     void invalidToken() {
         UserDetails userDetails = User.withUsername("testuser").password("pass").authorities(Collections.emptyList()).build();
         String token = "invalid.token.value";
         assertThrows(io.jsonwebtoken.JwtException.class, () -> jwtService.extractUsername(token));
         assertThrows(io.jsonwebtoken.JwtException.class, () -> jwtService.validateToken(token, userDetails));
+    }
+
+    @Test
+    void generateTokenAndRefreshTokenWithUserEntity() {
+        com.onlineshop.auth.model.User user = new com.onlineshop.auth.model.User();
+        user.setUsername("entityuser");
+        user.setPassword("pass");
+        user.setEnabled(true);
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        assertNotNull(accessToken);
+        assertNotNull(refreshToken);
+        assertEquals("entityuser", jwtService.extractUsername(accessToken));
+        assertEquals("entityuser", jwtService.extractUsername(refreshToken));
+        assertFalse(jwtService.isTokenExpired(accessToken));
+        assertFalse(jwtService.isTokenExpired(refreshToken));
+        assertFalse(jwtService.isRefreshToken(accessToken));
+        assertTrue(jwtService.isRefreshToken(refreshToken));
+    }
+
+    @Test
+    void validateTokenWithString() {
+        UserDetails userDetails = User.withUsername("testuser").password("pass").authorities(Collections.emptyList()).build();
+        String token = jwtService.generateToken(userDetails);
+        assertTrue(jwtService.validateToken(token, userDetails));
+    }
+
+    @Test
+    void extractUsernameWithString() {
+        UserDetails userDetails = User.withUsername("extractuser").password("pass").authorities(Collections.emptyList()).build();
+        String token = jwtService.generateToken(userDetails);
+        assertEquals("extractuser", jwtService.extractUsername(token));
+    }
+
+    @Test
+    void getJwtSecretKeyCoverage() {
+        assertNotNull(jwtService.getJwtSecretKey());
+    }
+
+    @Test
+    void isRefreshTokenExceptionBranch() {
+        // This token will throw an exception in isRefreshToken, which should return false
+        String token = "invalid.token.value";
+        assertFalse(jwtService.isRefreshToken(token));
+    }
+
+    @Test
+    void extractAllClaimsExceptionBranch() {
+        // This will throw in extractAllClaims, which is used by extractClaim
+        String token = "invalid.token.value";
+        assertThrows(io.jsonwebtoken.JwtException.class, () -> jwtService.extractClaim(token, Claims::getSubject));
     }
 }
