@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             token = header.substring(7);
             try {
                 Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(jwtService.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                        .setSigningKey(jwtService.getJwtSecretKey())
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
