@@ -56,6 +56,47 @@ Open [http://localhost:9090/swagger-ui.html](http://localhost:9090/swagger-ui.ht
 
 ---
 
+## Running the Project
+
+To start the Spring Boot application:
+
+```sh
+./mvnw spring-boot:run
+```
+
+Or build and run the WAR:
+
+```sh
+./mvnw clean package
+java -jar target/auth-service-0.0.1-SNAPSHOT.war
+```
+
+## Running Tests
+
+To run all unit and integration tests:
+
+```sh
+./mvnw test
+```
+
+## Generating and Viewing Test Coverage
+
+To generate a test coverage report using JaCoCo:
+
+```sh
+./mvnw clean test jacoco:report
+```
+
+After the build completes, open the following file in your browser to view the coverage report:
+
+```
+target/site/jacoco/index.html
+```
+
+This will show detailed code coverage for your project.
+
+---
+
 ## API Endpoints
 
 - `POST /api/auth/register` — Register a new user
