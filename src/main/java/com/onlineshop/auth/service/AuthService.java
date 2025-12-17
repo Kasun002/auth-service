@@ -10,4 +10,5 @@ public interface AuthService {
     AuthResponse register(RegisterRequest request);
     AuthResponse refreshToken(String refreshToken);
     void changePassword(String username, ChangePasswordRequest request);
+    AuthResponse oauth2Login(String email, String name);
 }

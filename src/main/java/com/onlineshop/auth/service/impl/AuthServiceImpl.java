@@ -90,4 +90,23 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
+    @Override
+    public AuthResponse oauth2Login(String email, String name) {
+        User user = userRepository.findByUsername(email)
+            .orElseGet(() -> {
+                User newUser = new User();
+                newUser.setUsername(email);
+                newUser.setEmail(email);
+                newUser.setPassword(""); // No password for social login
+                newUser.setEnabled(true);
+                Role makerRole = roleRepository.findByName("MAKER")
+                    .orElseThrow(() -> new RuntimeException("Role not found: MAKER"));
+                newUser.setRole(makerRole);
+                return userRepository.save(newUser);
+            });
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return new AuthResponse(accessToken, refreshToken);
+    }
 }
