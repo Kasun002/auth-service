@@ -1,5 +1,18 @@
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "../stores/auth";
+
+const username = ref("");
+const password = ref("");
+const auth = useAuthStore();
+
+const onSubmit = () => {
+  auth.login({ username: username.value, password: password.value });
+};
+</script>
+
 <template>
-  <form @submit.prevent class="space-y-6">
+  <form @submit.prevent="onSubmit" class="space-y-6">
     <div>
       <label for="username" class="block text-sm font-medium text-gray-700"
         >Username</label
@@ -33,6 +46,9 @@
       >
         Login
       </button>
+    </div>
+    <div v-if="auth.error" class="text-red-500 text-center">
+      {{ auth.error }}
     </div>
   </form>
 </template>
