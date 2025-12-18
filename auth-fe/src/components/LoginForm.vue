@@ -1,0 +1,54 @@
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "../stores/auth";
+
+const username = ref("");
+const password = ref("");
+const auth = useAuthStore();
+
+const onSubmit = () => {
+  auth.login({ username: username.value, password: password.value });
+};
+</script>
+
+<template>
+  <form @submit.prevent="onSubmit" class="space-y-6">
+    <div>
+      <label for="username" class="block text-sm font-medium text-gray-700"
+        >Username</label
+      >
+      <input
+        id="username"
+        v-model="username"
+        type="text"
+        autocomplete="username"
+        required
+        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+    <div>
+      <label for="password" class="block text-sm font-medium text-gray-700"
+        >Password</label
+      >
+      <input
+        id="password"
+        v-model="password"
+        type="password"
+        autocomplete="current-password"
+        required
+        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+    <div>
+      <button
+        type="submit"
+        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Login
+      </button>
+    </div>
+    <div v-if="auth.error" class="text-red-500 text-center">
+      {{ auth.error }}
+    </div>
+  </form>
+</template>
