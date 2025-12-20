@@ -2,6 +2,8 @@
 
 A secure authentication microservice (Spring Boot) and modern frontend (Vue 3) for user registration, login, JWT-based authentication, password change, and token refresh. Built with Spring Boot, PostgreSQL, Flyway, Swagger, Vue 3, Pinia, and Tailwind CSS.
 
+![alt text](<Screenshot 2025-12-20 at 9.56.06 PM.png>)
+
 ---
 
 ## Features
