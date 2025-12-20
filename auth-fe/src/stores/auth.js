@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import authService from '../api/authService'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
+import { useToast } from 'vue-toast-notification'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -9,6 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref(null)
   const router = useRouter()
+  const $toast = useToast()
 
   async function login({ username, password }) {
     loading.value = true
@@ -24,6 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = data.accessToken
       user.value = data.user
       loading.value = false
+      $toast.success('Login successful!')
       router.push('/dashboard')
     } catch (err) {
       error.value = err.response?.data?.message || 'Login failed'
