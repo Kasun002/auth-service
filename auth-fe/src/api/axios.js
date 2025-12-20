@@ -7,8 +7,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
-function getSessionTokens() {
-  const session = sessionStorage.getItem('auth_session');
+function getSessionAuth() {
+  const session = sessionStorage.getItem('auth');
   if (!session) return {};
   try {
     return JSON.parse(session);
@@ -17,12 +17,12 @@ function getSessionTokens() {
   }
 }
 
-function setSessionTokens(obj) {
-  sessionStorage.setItem('auth_session', JSON.stringify(obj));
+function setSessionAuth(obj) {
+  sessionStorage.setItem('auth', JSON.stringify(obj));
 }
 
-function clearSession() {
-  sessionStorage.removeItem('auth_session');
+function clearSessionAuth() {
+  sessionStorage.removeItem('auth');
 }
 
 let isRefreshing = false;
@@ -42,7 +42,7 @@ function processQueue(error, token = null) {
 api.interceptors.request.use(
   (config) => {
     if (!config.skipAuth) {
-      const { accessToken } = getSessionTokens();
+      const { accessToken } = getSessionAuth();
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
@@ -57,9 +57,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     if (error.response && error.response.status === 401 && !originalRequest._retry && !originalRequest.url.endsWith('/auth/login')) {
-      const { refreshToken } = getSessionTokens();
+      const { refreshToken } = getSessionAuth();
       if (!refreshToken) {
-        clearSession();
+        clearSessionAuth();
         router.push('/');
         return Promise.reject(error);
       }
@@ -77,14 +77,14 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const res = await api.post('/auth/refresh', { refreshToken });
-        const { accessToken, refreshToken: newRefreshToken, ...rest } = res.data;
-        setSessionTokens({ accessToken, refreshToken: newRefreshToken, ...rest });
+        const { accessToken, refreshToken: newRefreshToken, user } = res.data;
+        setSessionAuth({ accessToken, refreshToken: newRefreshToken, user });
         api.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
         processQueue(null, accessToken);
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        clearSession();
+        clearSessionAuth();
         router.push('/');
         return Promise.reject(refreshError);
       } finally {
@@ -95,5 +95,5 @@ api.interceptors.response.use(
   }
 );
 
-export { getSessionTokens, setSessionTokens, clearSession };
+export { getSessionAuth, setSessionAuth, clearSessionAuth };
 export default api;

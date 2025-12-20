@@ -1,6 +1,8 @@
-# Auth Service (Spring Boot Microservice)
+# Auth Service (Spring Boot Microservice & Vue Frontend)
 
-A secure authentication microservice for user registration, login, JWT-based authentication, password change, and token refresh. Built with Spring Boot, PostgreSQL, Flyway, and Swagger.
+A secure authentication microservice (Spring Boot) and modern frontend (Vue 3) for user registration, login, JWT-based authentication, password change, and token refresh. Built with Spring Boot, PostgreSQL, Flyway, Swagger, Vue 3, Pinia, and Tailwind CSS.
+
+![alt text](<Screenshot 2025-12-20 at 9.56.06 PM.png>)
 
 ---
 
@@ -13,6 +15,7 @@ A secure authentication microservice for user registration, login, JWT-based aut
 - PostgreSQL with Flyway migrations
 - Swagger API documentation
 - Security best practices (password validation, JWT key size, endpoint protection)
+- Modern Vue 3 frontend with component-based architecture
 
 ---
 
@@ -20,6 +23,7 @@ A secure authentication microservice for user registration, login, JWT-based aut
 - Java 17+
 - Maven 3.8+
 - Docker & Docker Compose
+- Node.js 18+ and npm (for frontend)
 
 ---
 
@@ -34,6 +38,7 @@ cd auth-service
 ### 2. Configure Environment
 - Edit `src/main/resources/application.yml` if needed (DB credentials, JWT secret, etc).
 - Ensure `jwt.secret` is at least 32 characters.
+- Provide secrets via environment variables or a secrets file (see below).
 
 ### 3. Start PostgreSQL with Docker Compose
 ```sh
@@ -44,11 +49,19 @@ This will start a PostgreSQL instance on port 5432 with the database `shopdb`.
 ### 4. Run Database Migrations
 Flyway will automatically run migrations on application startup.
 
-### 5. Build and Run the Application
+### 5. Build and Run the Backend Application
+
+#### Option 1: Using Environment Variable (Recommended)
 ```sh
-./mvnw clean package
+export JWT_SECRET="<your-jwt-secret>"
 ./mvnw spring-boot:run
 ```
+
+#### Option 2: Using a Secrets File
+```sh
+./mvnw spring-boot:run -Dspring.config.additional-location=classpath:application-secrets.yml
+```
+
 The service will start on port 9090 by default.
 
 ### 6. Access Swagger API Docs
@@ -56,48 +69,25 @@ Open [http://localhost:9090/swagger-ui.html](http://localhost:9090/swagger-ui.ht
 
 ---
 
-## Running the Project
+## Frontend (auth-fe)
 
-To start the Spring Boot application:
+The frontend is located in the `auth-fe/` directory and is built with Vue 3, Vite, Pinia, and Tailwind CSS.
 
-```sh
-./mvnw spring-boot:run
-```
-
-Or build and run the WAR:
+### Setup & Run
 
 ```sh
-./mvnw clean package
-java -jar target/auth-service-0.0.1-SNAPSHOT.war
+cd auth-fe
+npm install
+npm run dev
 ```
 
-## Running Tests
-
-To run all unit and integration tests:
-
-```sh
-./mvnw test
-```
-
-## Generating and Viewing Test Coverage
-
-To generate a test coverage report using JaCoCo:
-
-```sh
-./mvnw clean test jacoco:report
-```
-
-After the build completes, open the following file in your browser to view the coverage report:
-
-```
-target/site/jacoco/index.html
-```
-
-This will show detailed code coverage for your project.
+- The frontend expects the backend API to be running and accessible at the URL specified in `VITE_API_BASE_URL` in `auth-fe/.env`.
+- All authentication and token management is handled securely using session storage and Axios interceptors.
+- See the frontend `auth-fe/README.md` for more details.
 
 ---
 
-## API Endpoints
+## API Endpoints (Backend)
 
 - `POST /api/auth/register` — Register a new user
 - `POST /api/auth/login` — Login and receive access/refresh tokens
@@ -177,6 +167,7 @@ See Swagger UI for full details and request/response schemas.
 - If you see DB connection errors, ensure Docker PostgreSQL is running and credentials match
 - If you see JWT errors, check your `jwt.secret` and token format
 - For Flyway errors, check migration scripts in `src/main/resources/db/migration/`
+- If you see errors about missing secrets, ensure you have set the required environment variables or are using the secrets file as described above.
 
 ---
 
