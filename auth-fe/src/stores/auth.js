@@ -48,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = data.user
       token.value = data.accessToken
       loading.value = false
+      $toast.success('Registration successful!')
       router.push('/dashboard')
     } catch (err) {
       error.value = err.response?.data?.message || 'Registration failed'
